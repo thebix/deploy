@@ -101,10 +101,8 @@ function dialogConfirm {
     select opt in $OPTIONS_CONFIRM; do
         if [ "$opt" = "Yes" ]; then
             RESPONSE=true
-            break
-        else
-            break
         fi
+        break
     done
     echo -e "Response: ${RESPONSE}${RESET}"
     $RESPONSE
@@ -157,8 +155,6 @@ echo -e "Apply ${WHITE}pre copy${RESET} actions..."
 preCopyActions
 echo -e "Pre copy actions applied"
 
-
-
 # clean previous backups with prompt
 if dialogConfirm "${CYAN}Remove old archives?"; then
     \rm -rf $DIR_BACKUP
@@ -187,15 +183,14 @@ echo -e "Post copy actions applied"
 
 if $IS_RELEASE; then
     echo -e "Creating a release branch"
-    # git checkout -b "release-${VERSION}" develop
+    git checkout -b "release-${VERSION}" develop
     echo -e "${CYAN}Change ${WHITE}./package.json${CYAN}. Then press enter to continue.${RESET}"
     read
     npm run build
     git add .
-    # git add ./package.json
-    ./bump-version.sh 1.2.3
-    # change CHANGELOG.md
-    # (opt) git push --set-upstream origin release-1.2.3
+    ./bump-version.sh
+    echo -e "Push release branch to remote"
+    git push --set-upstream origin "release-${VERSION}"
     git status
 fi
 
