@@ -1,3 +1,6 @@
+## 1.1.0 (July 09, 2017)
+
+
 ## 1 (July 09, 2017)
   - Merge branch 'feature/backup-copy-ignore' into develop
   - backup, copy, ignore script
