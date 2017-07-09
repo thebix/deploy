@@ -188,7 +188,7 @@ echo -e "Post copy actions applied"
 if $IS_RELEASE; then
     echo -e "Creating a release branch"
     # git checkout -b "release-${VERSION}" develop
-    echo -e "${CYAN}TODO: change ${WTHIE}./package.json${RESET}"
+    echo -e "${CYAN}Change ${WHITE}./package.json${CYAN}Then press enter to continue.${RESET}"
     read
     npm run build
     git add .
