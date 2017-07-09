@@ -121,7 +121,7 @@ if [ "$1" == "release" ]; then
         quit "No release version"
     else
         VERSION=$2
-        if [ "$3" == "continue" ] then
+        if [ "$3" == "continue" ]; then
             IS_RELEASE_CONTINUE=true
         fi
     fi
