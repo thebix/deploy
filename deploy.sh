@@ -110,6 +110,7 @@ function dialogConfirm {
 
 # AUTO CONFIGURATION
 IS_RELEASE=false
+IS_RELEASE_CONTINUE=false
 VERSION="0.0.1"
 if [ "$1" == "release" ]; then
     IS_RELEASE=true
@@ -120,6 +121,9 @@ if [ "$1" == "release" ]; then
         quit "No release version"
     else
         VERSION=$2
+        if "$3" == "continue" then
+            IS_RELEASE_CONTINUE=true
+        fi
     fi
 fi
 
@@ -128,6 +132,17 @@ DIR_IGNORE="$DIR_DESTINATION/$DIR_NAME_DESTINATION_IGNORE"
 
 # greetings
 echo -e "${YELLOW}Hello, ${WHITE}man.${RESET}"
+if $IS_RELEASE_CONTINUE; then
+    echo -e "We are going to CONTINUE deploy ${WHITE}RELEASE ${VERSION}${RESET}"
+    git co master
+	git merge --no-ff "release-${VERSION}"
+	git push
+	git checkout develop
+	git merge --no-ff "release-${VERSION}"
+	git push
+	git branch -d "release-${VERSION}"
+    quit "Release done"
+fi
 if $IS_RELEASE; then
     echo -e "We are going to deploy ${WHITE}RELEASE ${VERSION}${RESET}"
 else
