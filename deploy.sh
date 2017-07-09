@@ -15,8 +15,6 @@ function postCopyActions {
 }
 # END CONFIGURATION
 
-DIR_IGNORE="$DIR_DESTINATION/$DIR_NAME_DESTINATION_IGNORE"
-
 NOW="$(date +'%B %d, %Y %T')"
 RED="\033[1;31m"
 GREEN="\033[0;32m"
@@ -112,9 +110,32 @@ function dialogConfirm {
     $RESPONSE
 }
 
+# AUTO CONFIGURATION
+IS_RELEASE=false
+VERSION="0.0.1"
+if [ "$1" == "release" ]; then
+    IS_RELEASE=true
+    echo $2
+    if stringIsEmpty $2; then
+        CURRENT_VERSION=`cat VERSION`
+        echo -e "${RED}Version of release required. Current ${CURRENT_VERSION}${RESET}"
+        quit "No release version"
+    else
+        VERSION=$2
+    fi
+fi
+
+DIR_IGNORE="$DIR_DESTINATION/$DIR_NAME_DESTINATION_IGNORE"
+# END AUTOCONFIGURATION
+
 # greetings
 echo -e "${YELLOW}Hello, ${WHITE}man.${RESET}"
-echo -e "We are going to make deploy"
+if $IS_RELEASE; then
+    echo -e "We are going to deploy ${WHITE}RELEASE${RESET}"
+else
+    echo -e "We are going to deploy ${WHITE}DEVELOP${RESET}"
+fi
+
 # check directories exits end has content
 echo -e "Check configs..."
 dirExistsTerminate "Source" $DIR_SOURCE
@@ -135,6 +156,9 @@ fi
 echo -e "Apply ${WHITE}pre copy${RESET} actions..."
 preCopyActions
 echo -e "Pre copy actions applied"
+
+
+
 # clean previous backups with prompt
 if dialogConfirm "${CYAN}Remove old archives?"; then
     \rm -rf $DIR_BACKUP
@@ -160,6 +184,19 @@ fi
 echo -e "Apply ${WHITE}post copy${RESET} actions..."
 postCopyActions
 echo -e "Post copy actions applied"
+
+if $IS_RELEASE; then
+    echo -e "Creating a release branch"
+
+    git checkout -b "release-${VERSION}" develop
+    echo -e "${CYAN}TODO: change ${WTHIE}./package.json${RESET}"
+    npm run build
+    git add .
+    add ./package.json
+    ./bump-version.sh 1.2.3
+    change CHANGELOG.md
+    # (opt) git push --set-upstream origin release-1.2.3
+fi
 
 # exit success
 quit 666
