@@ -1,3 +1,6 @@
+## 0.2.1 (July 09, 2017)
+  - added release finish command 
+
 ## 0.2.0 (July 09, 2017)
   - backup, copy, ignore script
   - added bump-version.sh
