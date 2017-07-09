@@ -131,7 +131,7 @@ DIR_IGNORE="$DIR_DESTINATION/$DIR_NAME_DESTINATION_IGNORE"
 # greetings
 echo -e "${YELLOW}Hello, ${WHITE}man.${RESET}"
 if $IS_RELEASE; then
-    echo -e "We are going to deploy ${WHITE}RELEASE${RESET}"
+    echo -e "We are going to deploy ${WHITE}RELEASE ${VERSION}${RESET}"
 else
     echo -e "We are going to deploy ${WHITE}DEVELOP${RESET}"
 fi
@@ -188,11 +188,11 @@ echo -e "Post copy actions applied"
 if $IS_RELEASE; then
     echo -e "Creating a release branch"
     # git checkout -b "release-${VERSION}" develop
-    echo -e "${CYAN}Change ${WHITE}./package.json${CYAN}Then press enter to continue.${RESET}"
+    echo -e "${CYAN}Change ${WHITE}./package.json${CYAN}. Then press enter to continue.${RESET}"
     read
     npm run build
     git add .
-    git add ./package.json
+    # git add ./package.json
     ./bump-version.sh 1.2.3
     # change CHANGELOG.md
     # (opt) git push --set-upstream origin release-1.2.3
