@@ -134,7 +134,7 @@ DIR_IGNORE="$DIR_DESTINATION/$DIR_NAME_DESTINATION_IGNORE"
 echo -e "${YELLOW}Hello, ${WHITE}man.${RESET}"
 if $IS_RELEASE_CONTINUE; then
     echo -e "We are going to CONTINUE deploy ${WHITE}RELEASE ${VERSION}${RESET}"
-    git co master
+    git checkout master
 	git merge --no-ff "release-${VERSION}"
 	git push
 	git checkout develop
