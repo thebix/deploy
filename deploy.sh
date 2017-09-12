@@ -163,6 +163,9 @@ fi
 echo -e "Check configs..."
 dirExistsTerminate "Source" $DIR_SOURCE
 dirIsEmptyTerminate "Source" $DIR_SOURCE
+if ! dirExists "Backup" $DIR_BACKUP; then
+    \mkdir $DIR_BACKUP
+fi
 
 DIR_IGNORE_EXISTS=false
 if ! stringIsEmpty $DIR_NAME_DESTINATION_IGNORE; then
