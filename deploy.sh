@@ -1,10 +1,7 @@
 #!/bin/bash
 
-# CONFIGURATION
-DIR_SOURCE="./source"
-DIR_DESTINATION="../delme_destination"
-DIR_NAME_DESTINATION_IGNORE="ignore/real_ignore" # inside DIR_DESTINATION, this files should be saved
-DIR_BACKUP="./storage/bkp" # subdir = current date
+# INFO: configure this file
+. ./deploy.config
 
 function preCopyActions {
     echo "preCopyActions"
@@ -109,6 +106,13 @@ function dialogConfirm {
 }
 
 # AUTO CONFIGURATION
+if [ "$1" != "release" ]; then
+    if ! stringIsEmpty "$1"; then
+        echo -e "How to:\n${CYAN}./deploy.sh${RESET} -- just copy files\n${CYAN}./deploy.sh release 0.1.0${RESET} -- start release: co release-branch, copy files to rc folder\n ...check release version, hotfix bugs, ci to release branch\n${CYAN}./deploy.sh release 0.1.0 continue${RESET} -- end release: push to git, merge to master/develop ${RESET}"
+        quit 666
+    fi
+fi
+
 IS_RELEASE=false
 IS_RELEASE_CONTINUE=false
 VERSION="0.0.1"
@@ -128,6 +132,12 @@ if [ "$1" == "release" ]; then
 fi
 
 DIR_IGNORE="$DIR_DESTINATION/$DIR_NAME_DESTINATION_IGNORE"
+
+EXCLUDE_DIRECTORIES_RSYNC=""
+for i in "${DIR_EXCLUDE[@]}"
+do
+    EXCLUDE_DIRECTORIES_RSYNC="$EXCLUDE_DIRECTORIES_RSYNC --exclude='$i'"
+done
 # END AUTOCONFIGURATION
 
 # greetings
@@ -135,12 +145,12 @@ echo -e "${YELLOW}Hello, ${WHITE}man.${RESET}"
 if $IS_RELEASE_CONTINUE; then
     echo -e "We are going to CONTINUE deploy ${WHITE}RELEASE ${VERSION}${RESET}"
     git checkout master
-	git merge --no-ff "release-${VERSION}"
-	git push
-	git checkout develop
-	git merge --no-ff "release-${VERSION}"
-	git push
-	git branch -d "release-${VERSION}"
+    git merge --no-ff "release-${VERSION}"
+    git push
+    git checkout develop
+    git merge --no-ff "release-${VERSION}"
+    git push
+    git branch -d "release-${VERSION}"
     quit "Release done"
 fi
 if $IS_RELEASE; then
@@ -153,8 +163,6 @@ fi
 echo -e "Check configs..."
 dirExistsTerminate "Source" $DIR_SOURCE
 dirIsEmptyTerminate "Source" $DIR_SOURCE
-dirExistsTerminate "Destination" $DIR_DESTINATION
-dirExistsTerminate "Backup" $DIR_BACKUP
 
 DIR_IGNORE_EXISTS=false
 if ! stringIsEmpty $DIR_NAME_DESTINATION_IGNORE; then
@@ -163,6 +171,9 @@ if ! stringIsEmpty $DIR_NAME_DESTINATION_IGNORE; then
             DIR_IGNORE_EXISTS=true
         fi
     fi
+fi
+if ! stringIsEmpty $DIR_EXCLUDE; then
+    echo "Directories to exclude (no copy/bkp) ${WHITE}$DIR_EXCLUDE${RESET}"
 fi
 
 # apply pre copy actions from config
@@ -176,11 +187,12 @@ if dialogConfirm "${CYAN}Remove old archives?"; then
     mkdir $DIR_BACKUP
 fi
 # backup destination directory
-echo -e "Backup to '${WHITE}${DIR_BACKUP}/${NOW}${RESET}'"
-yes | cp -Rf $DIR_DESTINATION "$DIR_BACKUP/${NOW}"
+echo -e "Backup to '${WHITE}${DIR_BACKUP}/${PWD##*/}-${NOW}${RESET}'"
+yes | eval rsync -av $DIR_DESTINATION/ "'$DIR_BACKUP/${PWD##*/}-${NOW}/'"  ${EXCLUDE_DIRECTORIES_RSYNC}
 # copy source to destination
 echo -e "Copy source '${WHITE}${DIR_SOURCE}${RESET}' to destination '${WHITE}${DIR_DESTINATION}${RESET}'"
-yes | cp -Rf "$DIR_SOURCE/." $DIR_DESTINATION
+eval \rm -rf "'$DIR_DESTINATION'"
+yes | eval rsync -av "'$DIR_SOURCE/'" "'$DIR_DESTINATION/'"  ${EXCLUDE_DIRECTORIES_RSYNC}
 # restore ignore from backup
 if $DIR_IGNORE_EXISTS; then
     echo -e "Restore ignore directory '${WHITE}${DIR_IGNORE}${RESET}'"
@@ -188,7 +200,7 @@ if $DIR_IGNORE_EXISTS; then
     \rm -rf $DIR_IGNORE
     mkdir $DIR_IGNORE
     # copy ignore from backup to destination
-    yes | cp -Rf "$DIR_BACKUP/$NOW/$DIR_NAME_DESTINATION_IGNORE/." $DIR_IGNORE
+    yes | cp -Rf "$DIR_BACKUP/${PWD##*/}-$NOW/$DIR_NAME_DESTINATION_IGNORE/." $DIR_IGNORE
 fi
 
 # apply post copy actions from config

@@ -3,3 +3,7 @@ node_modules
 token.js
 storage/
 source/
+test/destination/ignore/file_not_ignored.txt
+test/destination/real_copy.txt
+test/destination/exclude_folder/file_in_excluded_folder.txt
+test/bkp/deploy-*
