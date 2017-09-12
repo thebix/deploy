@@ -1,0 +1,1 @@
+after ./deploy.sh this file SHOULD be in destination folfer

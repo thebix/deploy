@@ -189,19 +189,9 @@ fi
 # backup destination directory
 echo -e "Backup to '${WHITE}${DIR_BACKUP}/${PWD##*/}-${NOW}${RESET}'"
 yes | eval rsync -av $DIR_DESTINATION/ "'$DIR_BACKUP/${PWD##*/}-${NOW}/'"  ${EXCLUDE_DIRECTORIES_RSYNC}
-# copy source to destination
+# copy source to destination without ignore directory
 echo -e "Copy source '${WHITE}${DIR_SOURCE}${RESET}' to destination '${WHITE}${DIR_DESTINATION}${RESET}'"
-eval \rm -rf "'$DIR_DESTINATION'"
-yes | eval rsync -av "'$DIR_SOURCE/'" "'$DIR_DESTINATION/'"  ${EXCLUDE_DIRECTORIES_RSYNC}
-# restore ignore from backup
-if $DIR_IGNORE_EXISTS; then
-    echo -e "Restore ignore directory '${WHITE}${DIR_IGNORE}${RESET}'"
-    # clean ignore directory
-    \rm -rf $DIR_IGNORE
-    mkdir $DIR_IGNORE
-    # copy ignore from backup to destination
-    yes | cp -Rf "$DIR_BACKUP/${PWD##*/}-$NOW/$DIR_NAME_DESTINATION_IGNORE/." $DIR_IGNORE
-fi
+yes | eval rsync -av --delete "'$DIR_SOURCE/'" "'$DIR_DESTINATION/'"  ${EXCLUDE_DIRECTORIES_RSYNC} "--exclude='$DIR_NAME_DESTINATION_IGNORE/*'"
 
 # apply post copy actions from config
 echo -e "Apply ${WHITE}post copy${RESET} actions..."
