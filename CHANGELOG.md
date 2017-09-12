@@ -1,3 +1,10 @@
+## 0.3.0 (September 12, 2017)
+
+  - Test directories
+  - Config file deploy.config
+  - Exclude folders from copying with new setting
+  - Help info
+
 ## 0.2.1 (July 09, 2017)
   - added release finish command 
 
